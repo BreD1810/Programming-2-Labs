@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Calendar;
 
 public class Clock extends JFrame
 {
@@ -17,6 +18,11 @@ public class Clock extends JFrame
     {
         super("Clock");
         init();
+        while(true)
+        {
+            Calendar now = Calendar.getInstance();
+            setTime(now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), now.get(Calendar.SECOND));
+        }
     }
 
     private void init()
