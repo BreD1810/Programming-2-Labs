@@ -70,9 +70,7 @@ public class RandomIntFile
         int[] values = new int[10000];
         Random rand = new Random();
         for(int i = 0; i < 10000; i++)
-        {
             values[i] = rand.nextInt(10000)+1;
-        }
 
         return values;
     }

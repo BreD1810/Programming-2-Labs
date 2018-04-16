@@ -17,7 +17,7 @@ public class FileDisplayer extends JFrame
 
     public FileDisplayer()
     {
-        super("File Displayer");
+        super("Text File Displayer");
         init();
     }
 
@@ -34,7 +34,8 @@ public class FileDisplayer extends JFrame
         JTextArea textArea = new JTextArea(10, 1);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setPreferredSize(new Dimension(400, 400));
 
         //Select the file the user wants to view when the button is pressed.
         JButton selectFile = new JButton("Select File");
@@ -42,15 +43,34 @@ public class FileDisplayer extends JFrame
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
-                fileChooser.showOpenDialog(mainPanel);
-                File file = fileChooser.getSelectedFile();
-                displayFile(file, textArea);
+                int fileReturn = fileChooser.showOpenDialog(mainPanel);
+                if(fileReturn == JFileChooser.APPROVE_OPTION)
+                {
+                    File file = fileChooser.getSelectedFile();
+                    if(!file.getName().contains(".txt"))
+                    {
+                        JOptionPane.showMessageDialog(null, "This program will only accept txt files.");
+                    }
+                    else
+                    {
+                        displayFile(file, textArea);
+                    }
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(null, "No file selected.");
+
+                }
             }
         });
 
-        mainPanel.setLayout(new GridLayout(2, 1));
+        //Make the button look nicer
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(selectFile);
+
+        //mainPanel.setLayout(new GridLayout(2, 1));
         mainPanel.add(scrollPane);
-        mainPanel.add(selectFile);
+        mainPanel.add(buttonPanel);
 
         pack();
         setVisible(true);
@@ -69,10 +89,7 @@ public class FileDisplayer extends JFrame
         {
             br = new BufferedReader(new FileReader(file));
             for(String line; (line=br.readLine()) != null;)
-            {
                 textArea.setText(textArea.getText() + line + "\n");
-            }
-
         }
         catch (IOException ioe)
         {
@@ -85,7 +102,7 @@ public class FileDisplayer extends JFrame
                 if (br != null)
                     br.close();
             }
-            catch(IOException ioe) { }
+            catch(IOException ioe) {System.out.println("Error in finally.");}
         }
 
         this.repaint();
