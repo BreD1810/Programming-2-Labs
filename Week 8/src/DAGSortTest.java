@@ -1,10 +1,9 @@
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -64,6 +63,19 @@ public class DAGSortTest
     }
 
     /**
+     * Test for an empty array input - no nodes at all.
+     * Should return an empty array.
+     */
+    @Test
+    public void emptyEdges() throws CycleDetectedException, InvalidNodeException
+    {
+        edges = new int[0][];
+        int[] expected = new int[0];
+        int[] result = sorter.sortDAG(edges);
+        assertArrayEquals("Empty", expected, result);
+    }
+
+    /**
      * Test for a cycle. A CycleDetectedException should be thrown.
      */
     @Test(expected = CycleDetectedException.class)
@@ -74,10 +86,10 @@ public class DAGSortTest
     }
 
     /**
-     * Test for a loop. A CycleDetectedException should be thrown.
+     * Test for a loop (which is a cycle). A CycleDetectedException should be thrown.
      */
     @Test(expected = CycleDetectedException.class)
-    public void loopCycle() throws CycleDetectedException, InvalidNodeException
+    public void loop() throws CycleDetectedException, InvalidNodeException
     {
         edges = new int[][]{{0}};
         sorter.sortDAG(edges);
@@ -120,8 +132,21 @@ public class DAGSortTest
     }
 
     /**
+     * Test a completely reversed graph.
+     * This should return the the nodes in reverse order.
+     */
+    @Test
+    public void reverseGraph() throws CycleDetectedException, InvalidNodeException
+    {
+        edges = new int[][]{{}, {0}, {1}};
+        int[] expected = new int[]{2, 1, 0};
+        int[] result = sorter.sortDAG(edges);
+        assertArrayEquals("Linear Graph", expected, result);
+    }
+
+    /**
      * Test for a seperated graph (0 -> 1, 2 -> 3).
-     * The program should return the 2 connected pairs in reverse order.
+     * The program should return the 2 connected pairs.
      */
     @Test
     public void seperatedGraph() throws CycleDetectedException, InvalidNodeException
@@ -134,8 +159,6 @@ public class DAGSortTest
     /**
      * Test for all nodes being connected to a single node, like a tree.
      * This should return the root node, followed by the child nodes in reverse order.
-     * @throws CycleDetectedException
-     * @throws InvalidNodeException
      */
     @Test
     public void tree() throws CycleDetectedException, InvalidNodeException
@@ -143,6 +166,30 @@ public class DAGSortTest
         edges = new int[][]{{1, 2, 3}, {}, {}, {}};
         int[] result = sorter.sortDAG(edges);
         assertTrue("Tree", checkCorrect(result));
+    }
+
+    /**
+     * Test for a reversed tree (all nodes pointing to a single node.
+     * Added a child to the root node also.
+     */
+    @Test
+    public void reverseTree() throws CycleDetectedException, InvalidNodeException
+    {
+        edges = new int[][]{{4}, {0}, {0}, {0}, {}};
+        int[] result = sorter.sortDAG(edges);
+        assertTrue("Reverse Tree", checkCorrect(result));
+    }
+
+    /**
+     * Test for when the 0th node has a node pointing to it.
+     * This should return 3 as the first element.
+     */
+    @Test
+    public void zeroParent() throws CycleDetectedException, InvalidNodeException
+    {
+        edges = new int[][]{{1}, {2}, {}, {0}};
+        int[] result = sorter.sortDAG(edges);
+        assertTrue("Zero has a parent", checkCorrect(result));
     }
 
     /**
@@ -157,6 +204,33 @@ public class DAGSortTest
     }
 
     /**
+     * Test for a large tree.
+     */
+    @Test
+    public void largeTree() throws CycleDetectedException, InvalidNodeException
+    {
+        Random rand = new Random();
+        edges = new int[1000][];
+        //Generate a tree with 1000 nodes.
+        for(int i = 0; i < 999; i++)
+        {
+            //Each node can have a max of 50 connections
+            int connectionNumber = rand.nextInt(999 - i);
+            edges[i] = new int[connectionNumber];
+            for(int j=0; j<connectionNumber; j++)
+            {
+                //Can be connected to any node from 0-999
+                int node = rand.nextInt(999 -i) + (i+1);
+                edges[i][j] = node;
+            }
+            edges[999] = new int[]{};
+        }
+
+        int[] result = sorter.sortDAG(edges);
+        assertTrue("Large Tree", checkCorrect(result));
+    }
+
+    /**
      * Check if the result is valid.
      */
     private boolean checkCorrect(int[] result)
@@ -165,23 +239,19 @@ public class DAGSortTest
         if(result.length != edges.length)
             return false;
         ArrayList<Integer> checkedNodes = new ArrayList<Integer>();
-        for(int currentResult: result)
+
+        for(int i=result.length-1; i>=0; i--)
         {
-            //If the node is repeated, it's wrong.
-            if(checkedNodes.contains(currentResult))
+            if(checkedNodes.contains(result[i]) || result[i]<0 || result[i] >= edges.length)
                 return false;
-            for(int node : checkedNodes)
+            for(int node : edges[result[i]])
             {
-                if(node == currentResult)
+                if(!checkedNodes.contains(node))
                     return false;
             }
-            checkedNodes.add(currentResult);
+            checkedNodes.add(result[i]);
         }
         return true;
     }
 
-    //TODO: No cycle = works (orders properly).
-    //TODO: Random order
-    //TODO: 0 has a parent.
-    //TODO: Check the graph is valid rather than if it is correct.
 }
