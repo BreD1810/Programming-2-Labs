@@ -120,7 +120,7 @@ public class DAGSortTest
     }
 
     /**
-     * Test for a linear graph. 0 -> 1 -> 2/
+     * Test for a linear graph. 0 -> 1 -> 2
      * The program should return 0, 1, 2.
      */
     @Test
