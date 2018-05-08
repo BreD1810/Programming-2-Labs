@@ -4,15 +4,21 @@
 
 typedef int* TRIARR;
 
-TRIARR triNew(int N)
+int requiredSpace(int N)
 {
-    //Work out the number of ints needed.
     int needed = 0;
     int i = 0;
     for(i = 0; i <= N; ++i)
     {
         needed+=i;
     }
+    return needed;
+}
+
+TRIARR triNew(int N)
+{
+    //Work out the number of ints needed.
+    int needed = requiredSpace(N);
 
     //Create the data
     TRIARR data;
@@ -31,7 +37,7 @@ TRIARR triNew(int N)
 int triStore(TRIARR as, int N, int row, int col, int val)
 {
     //Check the input is valid.
-    if(row > N || col > N || col < row)
+    if(row > N || col > N || col < row || sizeof(as)/sizeof(int) != requiredSpace(N))
     {
         return -1;
     }
@@ -53,7 +59,7 @@ int triStore(TRIARR as, int N, int row, int col, int val)
 int triFetch(TRIARR as, int N, int row, int col)
 {
     //Check the input is valid.
-    if(row > N || col > N || col < row)
+    if(row > N || col > N || col < row || sizeof(as)/sizeof(int) != requiredSpace(N))
     {
         return -1;
     }
@@ -98,5 +104,6 @@ int main()
     printf("Fetch error: %i\n", triFetch(test, number, number+1, number+1));
     printf("Write error: %i\n", triStore(test, number, 400, 400, 4));
     printf("Column is less than row: %i\n", triFetch(test, number, 2, 1));
+    printf("Too large test: %i\n", triStore(test, number+1, 0, 0, 2));
     return 0;
 }
